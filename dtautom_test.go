@@ -1,4 +1,4 @@
-package corewar
+package dtautom
 
 import "testing"
 
