@@ -18,3 +18,11 @@ func main() {
 	fmt.Printf("dtautom called with environment %v and agents %v.\n", environmentPath, agentPaths)
 	fmt.Println("dtautom does not actually do anything right now.")
 }
+
+func parseEnvFile(filepath string) Universe {
+	return Universe{}
+}
+
+func parseAgentFile(filepath string) []number {
+	return nil
+}
