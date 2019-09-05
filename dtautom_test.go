@@ -1,4 +1,4 @@
-package dtautom
+package main
 
 import "testing"
 

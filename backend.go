@@ -1,6 +1,6 @@
-// Package dtautom provides corewar-like functionality for decision theory dilemmas
+// dtautom provides corewar-like functionality for decision theory dilemmas
 // Spec at alignmentforum.org/posts/qdqYrcGZTh9Lp49Nj
-package dtautom
+package main
 
 type number int32 // a number in dtautom
 type cell struct {
@@ -26,10 +26,6 @@ const ( // all dtautom instructions
 	JIP               // jump to A if B is pointer
 	DJN               // decrement B, then jump to A if B is not 0
 )
-
-func main() {
-	print("hi")
-}
 
 func (u *Universe) Execute(loc number) {
 	u.memory[loc].isInstructionPointer = false // the pointer always moves
