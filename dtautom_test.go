@@ -2,6 +2,6 @@ package dtautom
 
 import "testing"
 
-func TestWorks(t *testing.T) {
+func TestInitialize(t *testing.T) {
 	_ = Universe{}
 }
