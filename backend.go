@@ -9,7 +9,6 @@ type cell struct {
 	isMoney              bool
 }
 
-const NumAgents = 4
 const UniverseSize = 1000
 const ( // all dtautom instructions
 	DIE number = iota // kills the agent
@@ -91,11 +90,11 @@ func (u *Universe) Execute(loc number) {
 type Universe struct {
 	memory [UniverseSize]cell
 	// Stored so we don't have to iterate over all of space every iteration:
-	pointers [NumAgents]number
+	pointers map[number]bool
 }
 
 func Transition(u Universe) {
-	for _, p := range u.pointers {
+	for p := range u.pointers {
 		u.Execute(p)
 	}
 }
