@@ -9,6 +9,7 @@ type cell struct {
 	isMoney     bool
 }
 
+const maxStep number = 100 // the largest distance a processor can see, touch, or move
 const UniverseSize = 1000
 const ( // all dtautom instructions
 	DIE number = iota // processor self destructs
@@ -40,11 +41,20 @@ func (u *Universe) DeleteProcessor(loc number) {
 func (u *Universe) Execute(loc number) {
 	// the processor always moves, so we delete the current one:
 	u.DeleteProcessor(loc)
+
 	instruction := u.memory[loc].n
-	Aloc := loc + u.memory[loc+1].n%UniverseSize
+	Astep := u.memory[loc+1].n
+	Bstep := u.memory[loc+2].n
+
+	if (Astep > maxStep || Bstep > maxStep) && instruction != DAT { // agent tries to reach too far
+		return // the agent dies
+	}
+
+	Aloc := (loc + Astep) % UniverseSize
+	Bloc := (loc + Bstep) % UniverseSize
 	A := &u.memory[Aloc] // first target of operation
-	Bloc := loc + u.memory[loc+2].n%UniverseSize
 	B := &u.memory[Bloc] // second target of operation
+
 	switch instruction {
 	// A `return` prevents the creation of a new processor, so effectively means "die"
 	case DIE:
