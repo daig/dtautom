@@ -32,11 +32,14 @@ func (u *Universe) AddPointer(loc number) {
 	u.memory[loc].isInstructionPointer = true
 }
 
-func (u *Universe) Execute(loc number) {
-	// the pointer always moves, so we delete the current one:
+func (u *Universe) DeletePointer(loc number) {
 	delete(u.pointers, loc)
 	u.memory[loc].isInstructionPointer = false
+}
 
+func (u *Universe) Execute(loc number) {
+	// the pointer always moves, so we delete the current one:
+	u.DeletePointer(loc)
 	instruction := u.memory[loc].n
 	Aloc := loc + u.memory[loc+1].n%UniverseSize
 	A := &u.memory[Aloc] // first target of operation
