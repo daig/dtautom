@@ -4,14 +4,14 @@ package main
 
 type number int32 // a number in dtautom
 type cell struct {
-	n                    number
-	isInstructionPointer bool // TODO: think of better name
-	isMoney              bool
+	n           number
+	isProcessor bool // TODO: think of better name
+	isMoney     bool
 }
 
 const UniverseSize = 1000
 const ( // all dtautom instructions
-	DIE number = iota // kills the agent
+	DIE number = iota // processor self destructs
 	DAT               // no-op or data
 	MOV               // copy from A to B
 	ADD               // add A to B
@@ -22,32 +22,31 @@ const ( // all dtautom instructions
 	JMZ               // jump to A if B is zero
 	JMN               // jump to A if B is not zero
 	JIM               // jump to A if B is money
-	JIP               // jump to A if B is pointer
+	JIP               // jump to A if B is processor
 	DJN               // decrement B, then jump to A if B is not 0
 	MVM               // move money from one money slot to another money slot
 )
 
-func (u *Universe) AddPointer(loc number) {
+func (u *Universe) AddProcessor(loc number) {
 	u.pointers[loc] = true
-	u.memory[loc].isInstructionPointer = true
+	u.memory[loc].isProcessor = true
 }
 
-func (u *Universe) DeletePointer(loc number) {
+func (u *Universe) DeleteProcessor(loc number) {
 	delete(u.pointers, loc)
-	u.memory[loc].isInstructionPointer = false
+	u.memory[loc].isProcessor = false
 }
 
 func (u *Universe) Execute(loc number) {
-	// the pointer always moves, so we delete the current one:
-	u.DeletePointer(loc)
+	// the processor always moves, so we delete the current one:
+	u.DeleteProcessor(loc)
 	instruction := u.memory[loc].n
 	Aloc := loc + u.memory[loc+1].n%UniverseSize
 	A := &u.memory[Aloc] // first target of operation
 	Bloc := loc + u.memory[loc+2].n%UniverseSize
 	B := &u.memory[Bloc] // second target of operation
 	switch instruction {
-	// `return` to skip the final line of this function, which creates a new pointer at the end.
-	// Effectively, return means die.
+	// A `return` prevents the creation of a new processor, so effectively means "die"
 	case DIE:
 		return
 	case DAT: // do nothing
@@ -68,41 +67,41 @@ func (u *Universe) Execute(loc number) {
 		B.n -= A.n
 	case CMP:
 		if A.n == B.n {
-			u.AddPointer(loc + 6)
+			u.AddProcessor(loc + 6)
 			return
 		}
 	case SLT:
 		if A.n < B.n {
-			u.AddPointer(loc + 6)
+			u.AddProcessor(loc + 6)
 			return
 		}
 	case JMP:
-		u.AddPointer(Aloc)
+		u.AddProcessor(Aloc)
 		return
 	case JMZ:
 		if B.n == 0 {
-			u.AddPointer(Aloc)
+			u.AddProcessor(Aloc)
 			return
 		}
 	case JMN:
 		if B.n != 0 {
-			u.AddPointer(Aloc)
+			u.AddProcessor(Aloc)
 			return
 		}
 	case JIM:
 		if B.isMoney {
-			u.AddPointer(Aloc)
+			u.AddProcessor(Aloc)
 			return
 		}
 	case JIP:
-		if B.isInstructionPointer {
-			u.AddPointer(Aloc)
+		if B.isProcessor {
+			u.AddProcessor(Aloc)
 			return
 		}
 	case DJN:
 		B.n--
 		if B.n != 0 {
-			u.AddPointer(Aloc)
+			u.AddProcessor(Aloc)
 			return
 		}
 	case MVM:
@@ -118,7 +117,7 @@ func (u *Universe) Execute(loc number) {
 	default: // invalid instruction is a DIE
 		return
 	}
-	u.AddPointer(loc + 3)
+	u.AddProcessor(loc + 3)
 }
 
 type Universe struct {
