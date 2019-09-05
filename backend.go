@@ -26,59 +26,69 @@ const ( // all dtautom instructions
 	DJN               // decrement B, then jump to A if B is not 0
 )
 
+func (u *Universe) AddPointer(loc number) {
+	u.pointers[loc] = true
+	u.memory[loc].isInstructionPointer = true
+}
+
 func (u *Universe) Execute(loc number) {
-	u.memory[loc].isInstructionPointer = false // the pointer always moves
+	// the pointer always moves, so we delete the current one:
+	delete(u.pointers, loc)
+	u.memory[loc].isInstructionPointer = false
+
 	instruction := u.memory[loc].n
-	A := &u.memory[loc+1].n
-	B := &u.memory[loc+2].n
+	Aloc := loc + u.memory[loc+1].n%UniverseSize
+	A := &u.memory[Aloc] // first target of operation
+	Bloc := loc + u.memory[loc+2].n%UniverseSize
+	B := &u.memory[Bloc] // second target of operation
 	switch instruction {
-	// return when we don't want to put the pointer three spaces ahead
+	// `return` to skip the final line of this function, which creates a new pointer at the end
 	case DIE:
 		return
 	case DAT: // do nothing
 	case MOV:
-		*B = *A
+		B.n = A.n
 	case ADD:
-		*B += *A
+		B.n += A.n
 	case SUB:
-		*B -= *A
+		B.n -= A.n
 	case CMP:
-		if *A == *B {
-			u.memory[loc+6].isInstructionPointer = true
+		if A.n == B.n {
+			u.AddPointer(loc + 6)
 			return
 		}
 	case SLT:
-		if *A < *B {
-			u.memory[loc+6].isInstructionPointer = true
+		if A.n < B.n {
+			u.AddPointer(loc + 6)
 			return
 		}
 	case JMP:
-		u.memory[*A].isInstructionPointer = true
+		u.AddPointer(Aloc)
 		return
 	case JMZ:
-		if *B == 0 {
-			u.memory[*A].isInstructionPointer = true
+		if B.n == 0 {
+			u.AddPointer(Aloc)
 			return
 		}
 	case JMN:
-		if *B != 0 {
-			u.memory[*A].isInstructionPointer = true
+		if B.n != 0 {
+			u.AddPointer(Aloc)
 			return
 		}
 	case JIM:
-		if u.memory[loc+2].isMoney {
-			u.memory[*A].isInstructionPointer = true
+		if B.isMoney {
+			u.AddPointer(Aloc)
 			return
 		}
 	case JIP:
-		if u.memory[loc+2].isInstructionPointer {
-			u.memory[*A].isInstructionPointer = true
+		if B.isInstructionPointer {
+			u.AddPointer(Aloc)
 			return
 		}
 	case DJN:
-		*B--
-		if *B != 0 {
-			u.memory[*A].isInstructionPointer = true
+		B.n--
+		if B.n != 0 {
+			u.AddPointer(Aloc)
 			return
 		}
 	default: // invalid instruction is a DIE
