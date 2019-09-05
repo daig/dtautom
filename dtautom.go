@@ -1,24 +1,17 @@
-// Package corewar provides corewar-like functionality
-// One cell is a triple (int32, isInstructionPointer, isMoney)
-// There is no hidden data and each cell is an int32
-// An instruction operates on the next two cells after it.
-// As an optimization, the live instruction pointers are stored in a seperate array
-// The code goes [operation A B operation A B operation A B] and so on.
-// A is source and B is destination
-// All operations work on locations, not direct values.
-// https://corewar.co.uk/perry/evolution.htm
+// Package dtautom provides corewar-like functionality for decision theory dilemmas
+// Spec at alignmentforum.org/posts/qdqYrcGZTh9Lp49Nj
 package dtautom
 
-type number int32
+type number int32 // a number in dtautom
 type cell struct {
 	n                    number
-	isInstructionPointer bool
+	isInstructionPointer bool // TODO: think of better name
 	isMoney              bool
 }
 
 const NumAgents = 4
 const UniverseSize = 1000
-const (
+const ( // all dtautom instructions
 	DIE number = iota // kills the agent
 	DAT               // no-op or data
 	MOV               // copy from A to B
@@ -34,12 +27,19 @@ const (
 	DJN               // decrement B, then jump to A if B is not 0
 )
 
-func (u *Universe) Execute(loc number) (err error) {
+func main() {
+	print("hi")
+}
+
+func (u *Universe) Execute(loc number) {
+	u.memory[loc].isInstructionPointer = false // the pointer always moves
 	instruction := u.memory[loc].n
 	A := &u.memory[loc+1].n
 	B := &u.memory[loc+2].n
 	switch instruction {
+	// return when we don't want to put the pointer three spaces ahead
 	case DIE:
+		return
 	case DAT: // do nothing
 	case MOV:
 		*B = *A
@@ -49,38 +49,57 @@ func (u *Universe) Execute(loc number) (err error) {
 		*B -= *A
 	case CMP:
 		if *A == *B {
+			u.memory[loc+6].isInstructionPointer = true
+			return
 		}
 	case SLT:
 		if *A < *B {
+			u.memory[loc+6].isInstructionPointer = true
+			return
 		}
 	case JMP:
+		u.memory[*A].isInstructionPointer = true
+		return
 	case JMZ:
 		if *B == 0 {
+			u.memory[*A].isInstructionPointer = true
+			return
 		}
 	case JMN:
 		if *B != 0 {
-
+			u.memory[*A].isInstructionPointer = true
+			return
 		}
 	case JIM:
-		if u.memory[loc+1].isMoney {
+		if u.memory[loc+2].isMoney {
+			u.memory[*A].isInstructionPointer = true
+			return
 		}
 	case JIP:
+		if u.memory[loc+2].isInstructionPointer {
+			u.memory[*A].isInstructionPointer = true
+			return
+		}
 	case DJN:
-	default:
+		*B--
+		if *B != 0 {
+			u.memory[*A].isInstructionPointer = true
+			return
+		}
+	default: // invalid instruction is a DIE
+		return
 	}
-	return nil
+	u.memory[loc+3].isInstructionPointer = true
 }
 
 type Universe struct {
-	memory   [UniverseSize]cell
+	memory [UniverseSize]cell
+	// Stored so we don't have to iterate over all of space every iteration:
 	pointers [NumAgents]number
 }
 
 func Transition(u Universe) {
 	for _, p := range u.pointers {
-		err := u.Execute(p)
-		if err != nil {
-			// kill the agent or whatever
-		}
+		u.Execute(p)
 	}
 }
