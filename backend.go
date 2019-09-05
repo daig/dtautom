@@ -24,6 +24,7 @@ const ( // all dtautom instructions
 	JIM               // jump to A if B is money
 	JIP               // jump to A if B is pointer
 	DJN               // decrement B, then jump to A if B is not 0
+	MVM               // move money from one money slot to another money slot
 )
 
 func (u *Universe) AddPointer(loc number) {
@@ -42,15 +43,25 @@ func (u *Universe) Execute(loc number) {
 	Bloc := loc + u.memory[loc+2].n%UniverseSize
 	B := &u.memory[Bloc] // second target of operation
 	switch instruction {
-	// `return` to skip the final line of this function, which creates a new pointer at the end
+	// `return` to skip the final line of this function, which creates a new pointer at the end.
+	// Effectively, return means die.
 	case DIE:
 		return
 	case DAT: // do nothing
 	case MOV:
+		if B.isMoney {
+			return // can't create money
+		}
 		B.n = A.n
 	case ADD:
+		if B.isMoney {
+			return // can't create money
+		}
 		B.n += A.n
 	case SUB:
+		if B.isMoney {
+			return // can't destroy money
+		}
 		B.n -= A.n
 	case CMP:
 		if A.n == B.n {
@@ -91,10 +102,20 @@ func (u *Universe) Execute(loc number) {
 			u.AddPointer(Aloc)
 			return
 		}
+	case MVM:
+		// Can only move money from one money slot to another money slot
+		// Money slots cannot be created or destroyed
+		if A.isMoney && B.isMoney {
+			B.n += A.n
+			A.n = 0
+		} else {
+			// If you try on non-money then you die
+			return
+		}
 	default: // invalid instruction is a DIE
 		return
 	}
-	u.memory[loc+3].isInstructionPointer = true
+	u.AddPointer(loc + 3)
 }
 
 type Universe struct {
