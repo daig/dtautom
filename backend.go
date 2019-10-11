@@ -29,12 +29,12 @@ const ( // all dtautom instructions
 )
 
 func (u *Universe) AddProcessor(loc number) {
-	u.pointers[loc] = true
+	u.processors[loc] = true
 	u.memory[loc].isProcessor = true
 }
 
 func (u *Universe) DeleteProcessor(loc number) {
-	delete(u.pointers, loc)
+	delete(u.processors, loc)
 	u.memory[loc].isProcessor = false
 }
 
@@ -133,11 +133,11 @@ func (u *Universe) Execute(loc number) {
 type Universe struct {
 	memory [UniverseSize]cell
 	// Stored so we don't have to iterate over all of space every iteration:
-	pointers map[number]bool
+	processors map[number]bool
 }
 
 func Transition(u Universe) {
-	for p := range u.pointers {
+	for p := range u.processors {
 		u.Execute(p)
 	}
 }
