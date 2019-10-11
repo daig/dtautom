@@ -35,8 +35,8 @@ const ( // all dtautom instructions
 	ADD       // add A to B
 	SUBTRACT  // subtract A from B
 	JUMP      // unconditional jump to A
-	MAKEPROC  // mark A as a processor cell
 	MAKEMONEY // set A to 0 and mark it as money cell
+	MAKEPROC  // mark A as a processor cell
 	// conditional operations:
 	ISEQUAL // skip ahead if A = B
 	ISLESS  // skip ahead if A < B
@@ -143,6 +143,7 @@ func (u *Universe) Execute(loc number) {
 type Universe struct {
 	memory [UniverseSize]cell
 	// Stored so we don't have to iterate over all of space every iteration:
+	// (Doesn't change universe behavior)
 	processors map[number]bool
 }
 
