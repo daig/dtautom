@@ -1,7 +1,8 @@
-size=1000
-insertion_points=100 200
-max_lengths=50 50
-555=DATA F F
-556=100 F F
-557=150 F F
-558=
+// dtautom-0.0.1
+// comments start with double slash
+size 100 // comments can be on line ends
+insertion_points 0 50
+max_lengths 30 30 // certain variables must be defined
+555 DATA F F // the rest of the file is for filling values
+556 100 F F
+557 150 F F
