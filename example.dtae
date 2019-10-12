@@ -1,4 +1,5 @@
 // dtautom-0.0.1
+// example environment file
 // comments start with double slash
 size 100 // comments can be on line ends
 insertion_points 0 50

@@ -1,5 +1,5 @@
 // dtautom-0.0.1
-// comments start with two slashes and end with newline
+// example agent file
 ADD +5 +10
 tag1: // a word ending in colon is a tag
 DATA 3 4 // all jumps are relative though
