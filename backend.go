@@ -24,7 +24,6 @@ type cell struct {
 
 const maxStep number = 100 // the largest distance a processor can see, touch, or move
 const UniverseSize = 1000
-const defaultStep = 3
 const ( // all dtautom instructions
 	_ number = iota
 	// unconditional operations:
