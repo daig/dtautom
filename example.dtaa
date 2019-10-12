@@ -1,0 +1,12 @@
+// dtautom agent
+ADD
++5
++10
+DATA
+3
+4
+JUMP
+-6
+0
+
+Not sure whether we'll support tags.
