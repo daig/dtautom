@@ -6,7 +6,7 @@
 // X think of better name than "processor". Chemical reaction as motivating analogy?
 // Ideas:
 // + Allow the agent to create and destroy money squares
-// + Make the booleans part of the number
+// + Make the booleans part of the number?
 // + Add ability to destroy remote processors
 // X Add ability to mark cells as money but set to 0
 // + Allow the agent to read farther than it can write
