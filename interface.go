@@ -35,3 +35,37 @@ func splitOnEquals(s string) (string, string, error) {
 	}
 	return s[:i], s[i+1:], nil
 }
+
+func nameToNumber(s string) number {
+	switch s {
+	case "DIE":
+		return DIE
+	case "DATA":
+		return DATA
+	case "COPY":
+		return COPY
+	case "TRANSFER":
+		return TRANSFER
+	case "ADD":
+		return ADD
+	case "SUBTRACT":
+		return SUBTRACT
+	case "JUMP":
+		return JUMP
+	case "MAKEMONEY":
+		return MAKEMONEY
+	case "MAKEPROC":
+		return MAKEPROC
+	case "ISEQUAL":
+		return ISEQUAL
+	case "ISLESS":
+		return ISLESS
+	case "ISZERO":
+		return ISZERO
+	case "ISMONEY":
+		return ISMONEY
+	case "ISPROC":
+		return ISPROC
+	}
+	return -1
+}
