@@ -6,6 +6,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -25,4 +26,12 @@ func parseEnvFile(filepath string) Universe {
 
 func parseAgentFile(filepath string) []number {
 	return nil
+}
+
+func splitOnEquals(s string) (string, string, error) {
+	i := strings.IndexRune(s, '=')
+	if i == -1 {
+		return "", "", fmt.Errorf("string %v has no '='", s)
+	}
+	return s[:i], s[i+1:], nil
 }
