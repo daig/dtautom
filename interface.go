@@ -20,8 +20,8 @@ func main() {
 	fmt.Println("dtautom does not actually do anything right now.")
 }
 
-func parseEnvFile(filepath string) Universe {
-	return Universe{}
+func parseEnvFile(filepath string) universe {
+	return universe{}
 }
 
 func parseAgentFile(filepath string) []number {

@@ -23,8 +23,7 @@ type cell struct {
 }
 
 const maxStep number = 100 // the largest distance a processor can see, touch, or move
-const UniverseSize = 1000
-const ( // all dtautom instructions
+const (                    // all dtautom instructions
 	_ number = iota
 	// unconditional operations:
 	DIE       // processor self destructs
@@ -44,118 +43,118 @@ const ( // all dtautom instructions
 	ISPROC  // skip ahead if A is a processor
 )
 
-func (u *Universe) AddProcessor(loc number) {
+func (u *universe) addProcessor(loc number) {
 	u.processors[loc] = true
 	u.memory[loc].isProcessor = true
 }
 
-func (u *Universe) DeleteProcessor(loc number) {
+func (u *universe) deleteProcessor(loc number) {
 	delete(u.processors, loc)
 	u.memory[loc].isProcessor = false
 }
 
-func (u *Universe) Move(loc number, distance number) {
-	u.DeleteProcessor(loc)
+func (u *universe) move(loc number, distance number) {
+	u.deleteProcessor(loc)
 	// processor explodes if it tries to move too far
 	if abs(distance) <= maxStep {
-		u.AddProcessor((loc + distance) % UniverseSize)
+		u.addProcessor((loc + distance) % u.UniverseSize)
 	}
 }
 
-func (u *Universe) MoveIf(loc number, b bool) {
+func (u *universe) moveIf(loc number, b bool) {
 	if b {
-		u.Move(loc, 6)
+		u.move(loc, 6)
 	} else {
-		u.Move(loc, 3)
+		u.move(loc, 3)
 	}
 }
 
-func (u *Universe) Execute(loc number) {
+func (u *universe) execute(loc number) {
 	instruction := u.memory[loc].n
-	Adist := u.memory[(loc+1)%UniverseSize].n
-	Bdist := u.memory[(loc+2)%UniverseSize].n
+	Adist := u.memory[(loc+1)%u.UniverseSize].n
+	Bdist := u.memory[(loc+2)%u.UniverseSize].n
 
 	// Cannot read, write or jump to cells outside of range:
 	if abs(Adist) > maxStep || abs(Bdist) > maxStep {
-		u.DeleteProcessor(loc)
+		u.deleteProcessor(loc)
 		return // TODO: It should be fine if B is large if you don't use it.
 	}
 
-	A := &u.memory[(loc+Adist)%UniverseSize] // first target of operation
-	B := &u.memory[(loc+Bdist)%UniverseSize] // second target of operation
+	A := &u.memory[(loc+Adist)%u.UniverseSize] // first target of operation
+	B := &u.memory[(loc+Bdist)%u.UniverseSize] // second target of operation
 
 	switch instruction {
 	case DIE:
-		u.DeleteProcessor(loc)
+		u.deleteProcessor(loc)
 	case DATA: // do nothing
-		u.Move(loc, 3)
+		u.move(loc, 3)
 	case COPY:
 		if B.isMoney {
-			u.DeleteProcessor(loc) // forgery is punishable by death
+			u.deleteProcessor(loc) // forgery is punishable by death
 		} else {
 			B.n = A.n
-			u.Move(loc, 3)
+			u.move(loc, 3)
 		}
 	case TRANSFER:
 		if A.isMoney != B.isMoney { // both or neither must be money squares
-			u.DeleteProcessor(loc) // forgery is punishable by death
+			u.deleteProcessor(loc) // forgery is punishable by death
 		}
 		B.n += A.n
 		A.n = 0
 	case ADD:
 		if B.isMoney {
-			u.DeleteProcessor(loc) // forgery is punishable by death
+			u.deleteProcessor(loc) // forgery is punishable by death
 		} else {
 			B.n += A.n
-			u.Move(loc, 3)
+			u.move(loc, 3)
 		}
 	case SUBTRACT:
 		if B.isMoney {
-			u.DeleteProcessor(loc) // forgery is punishable by death
+			u.deleteProcessor(loc) // forgery is punishable by death
 		} else {
 			B.n -= A.n
-			u.Move(loc, 3)
+			u.move(loc, 3)
 		}
 	case JUMP:
-		u.Move(loc, Adist)
+		u.move(loc, Adist)
 	case MAKEMONEY:
 		A.n = 0
 		A.isMoney = true
 	case MAKEPROC:
 		A.isProcessor = true
 	case ISEQUAL:
-		u.MoveIf(loc, A.n == B.n)
+		u.moveIf(loc, A.n == B.n)
 	case ISLESS:
-		u.MoveIf(loc, A.n < B.n)
+		u.moveIf(loc, A.n < B.n)
 	case ISZERO:
-		u.MoveIf(loc, A.n == 0)
+		u.moveIf(loc, A.n == 0)
 	case ISMONEY:
-		u.MoveIf(loc, A.isMoney)
+		u.moveIf(loc, A.isMoney)
 	case ISPROC:
-		u.MoveIf(loc, A.isProcessor)
+		u.moveIf(loc, A.isProcessor)
 	default:
 		// invalid instruction is a DIE
-		u.DeleteProcessor(loc) // TODO: this should be logged or something
+		u.deleteProcessor(loc) // TODO: this should be logged or something
 	}
 }
 
-type Universe struct {
-	memory [UniverseSize]cell
+type universe struct {
+	UniverseSize number
+	memory       []cell
 	// Stored so we don't have to iterate over all of space every iteration:
 	// (Doesn't change universe behavior)
 	processors map[number]bool
 }
 
-func Transition(u Universe) {
+func (u *universe) transition() {
 	for p := range u.processors {
-		u.Execute(p)
+		u.execute(p)
 	}
 }
 
 func abs(x number) number {
 	if x > 0 {
 		return x
-	} else {
-		return -x
 	}
+	return -x
 }
