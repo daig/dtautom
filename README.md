@@ -6,4 +6,4 @@ _A decision theory automaton._ An automaton where you express decision theory di
 
 ### Authors
 
-[Luke H Miles](lukemiles.org)
+[Luke H Miles](https://lukemiles.org)
