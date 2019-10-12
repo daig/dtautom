@@ -1,1 +1,7 @@
-// example dtautom environment
+size=1000
+insertion_points=100 200
+max_lengths=50 50
+555=DATA F F
+556=100 F F
+557=150 F F
+558=
