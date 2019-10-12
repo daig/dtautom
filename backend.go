@@ -3,14 +3,14 @@
 
 // TODO:
 // + check within DeleteProcessor whether it exists yet
-// + think of better name that "processor". Chemical reaction as motivating analogy?
+// X think of better name than "processor". Chemical reaction as motivating analogy?
 // Ideas:
 // + Allow the agent to create and destroy money squares
 // + Make the booleans part of the number
 // + Add ability to destroy remote processors
-// + Add ability to mark cells as money but set to 0
+// X Add ability to mark cells as money but set to 0
 // + Allow the agent to read farther than it can write
-// + Make universe size and maxstep part of the universe
+// X Make universe size and maxstep part of the universe
 // + Think of better name for money (diamonds¿)
 
 package main
@@ -20,6 +20,14 @@ type cell struct {
 	n           number
 	isProcessor bool // TODO: think of better name
 	isMoney     bool
+}
+
+type universe struct {
+	UniverseSize number
+	memory       []cell
+	// Stored so we don't have to iterate over all of space every iteration:
+	// (Doesn't change universe behavior)
+	processors map[number]bool
 }
 
 const maxStep number = 100 // the largest distance a processor can see, touch, or move
@@ -43,29 +51,9 @@ const (                    // all dtautom instructions
 	ISPROC  // skip ahead if A is a processor
 )
 
-func (u *universe) addProcessor(loc number) {
-	u.processors[loc] = true
-	u.memory[loc].isProcessor = true
-}
-
-func (u *universe) deleteProcessor(loc number) {
-	delete(u.processors, loc)
-	u.memory[loc].isProcessor = false
-}
-
-func (u *universe) move(loc number, distance number) {
-	u.deleteProcessor(loc)
-	// processor explodes if it tries to move too far
-	if abs(distance) <= maxStep {
-		u.addProcessor((loc + distance) % u.UniverseSize)
-	}
-}
-
-func (u *universe) moveIf(loc number, b bool) {
-	if b {
-		u.move(loc, 6)
-	} else {
-		u.move(loc, 3)
+func (u *universe) transition() {
+	for p := range u.processors {
+		u.execute(p)
 	}
 }
 
@@ -138,17 +126,29 @@ func (u *universe) execute(loc number) {
 	}
 }
 
-type universe struct {
-	UniverseSize number
-	memory       []cell
-	// Stored so we don't have to iterate over all of space every iteration:
-	// (Doesn't change universe behavior)
-	processors map[number]bool
+func (u *universe) addProcessor(loc number) {
+	u.processors[loc] = true
+	u.memory[loc].isProcessor = true
 }
 
-func (u *universe) transition() {
-	for p := range u.processors {
-		u.execute(p)
+func (u *universe) deleteProcessor(loc number) {
+	delete(u.processors, loc)
+	u.memory[loc].isProcessor = false
+}
+
+func (u *universe) move(loc number, distance number) {
+	u.deleteProcessor(loc)
+	// processor explodes if it tries to move too far
+	if abs(distance) <= maxStep {
+		u.addProcessor((loc + distance) % u.UniverseSize)
+	}
+}
+
+func (u *universe) moveIf(loc number, b bool) {
+	if b {
+		u.move(loc, 6)
+	} else {
+		u.move(loc, 3)
 	}
 }
 
