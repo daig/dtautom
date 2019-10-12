@@ -8,6 +8,8 @@ Alpha quality right now. See https://www.alignmentforum.org/posts/qdqYrcGZTh9Lp4
 
 There are no instruction pointers; there are "processors" which execute what's in front of them and then either travel or explode. Just a matter of terminology.
 
+Matter has three dimensions: Weight, moneyness, and procness.
+
 A common pattern will be
 
 ```
